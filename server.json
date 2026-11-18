@@ -1,0 +1,8 @@
+{
+  "Address": "127.0.0.1", "Port": 7443,
+  "Root": ".local/data", "Database": ".local/accounts.db",
+  "Certificate": ".local/certs/server.pfx", "Ca": ".local/certs/ca.cer",
+  "MutualTls": false, "MaxConnections": 32, "MaxPerIp": 8,
+  "FailuresPerMinute": 5, "ConnectionsPerMinute": 60,
+  "HandshakeSeconds": 8, "LoginSeconds": 15, "IoSeconds": 30
+}
