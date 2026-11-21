@@ -2,7 +2,17 @@
   "Address": "127.0.0.1", "Port": 7443,
   "Root": ".local/data", "Database": ".local/accounts.db",
   "Certificate": ".local/certs/server.pfx", "Ca": ".local/certs/ca.cer",
-  "MutualTls": false, "MaxConnections": 32, "MaxPerIp": 8,
+  "MutualTls": true, "MaxConnections": 32, "MaxPerIp": 8,
+  "MaxPerUserConnections": 4, "RequestsPerMinute": 180,
+  "DefaultRate": { "UploadBytesPerSecond": 131072, "DownloadBytesPerSecond": 131072 },
+  "UserRates": {
+    "alice": { "UploadBytesPerSecond": 131072, "DownloadBytesPerSecond": 131072 },
+    "bob": { "UploadBytesPerSecond": 524288, "DownloadBytesPerSecond": 524288 }
+  },
+  "ProgressGraceSeconds": 5, "ProgressWindowSeconds": 5,
+  "MinTransferBytesPerSecond": 256, "MaxTransferSeconds": 86400,
+  "ResumeRetentionSeconds": 86400, "MaxResumeStates": 32,
+  "LogDirectory": ".local/logs", "LogFileBytes": 2097152, "LogArchives": 3,
   "FailuresPerMinute": 5, "ConnectionsPerMinute": 60,
   "HandshakeSeconds": 8, "LoginSeconds": 15, "IoSeconds": 30
 }

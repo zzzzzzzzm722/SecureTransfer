@@ -23,15 +23,21 @@ try
             Console.WriteLine("账号创建成功：" + args[2]);
             break;
         case "serve":
+        {
             var config = JsonSerializer.Deserialize<ServerOptions>(File.ReadAllText(args.Length > 1 ? args[1] : "server.json"))!;
+            // The deployed executable always authenticates both certificates, including legacy configurations.
+            config = config with { MutualTls = true };
+            using var log = new RotatingLog(config.LogDirectory, config.LogFileBytes, config.LogArchives);
             await using (var server = new TransferServer(config, Required("SFT_PFX_PASSWORD")))
             {
+                server.Log += log.Write;
                 var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
                 Console.CancelKeyPress += (s, e) => { e.Cancel = true; done.TrySetResult(); };
                 server.Start();
                 await done.Task;
             }
             break;
+        }
         default:
             Console.WriteLine("Server certs <目录> | add-user <数据库> <用户名> [客户端公证书] | serve [配置.json]\n口令由 SFT_PFX_PASSWORD / SFT_USER_PASSWORD 环境变量提供。");
             break;

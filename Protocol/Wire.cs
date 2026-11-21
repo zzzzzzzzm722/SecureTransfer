@@ -7,13 +7,24 @@ public enum MessageType : byte
 {
     Login = 1, LoginResult = 2, List = 3, ListResult = 4, UploadBegin = 5, Ready = 6,
     DownloadRequest = 7, TransferMeta = 8, Data = 9, TransferEnd = 10, TransferResult = 11,
-    Ping = 12, Pong = 13, Error = 14, Disconnect = 15
+    Ping = 12, Pong = 13, Error = 14, Disconnect = 15,
+    ResumeUpload = 16, ResumeDownload = 17, ResumeReady = 18, ChunkAck = 19
 }
 public record Login(string User, string Password);
 public record LoginResult(string ConnectionId, string User, string Tls);
 public record FileMeta(string Name, long Length);
 public record EndInfo(long Length, string Sha256);
-public record Result(bool Success, string Code, string Message);
+// Missing termination information is treated conservatively as fatal.
+public record Result(bool Success, string Code, string Message, bool Fatal = true);
+public record ResumeRequest(string TransferId, string Name, long Length, string Sha256,
+    long Offset, string PrefixSha256, bool Create);
+public record ResumeInfo(string TransferId, string Name, long Length, string Sha256,
+    long Offset, string PrefixSha256, int ChunkBytes, bool Completed = false);
+public record ChunkReceipt(long Offset, string PrefixSha256);
+public record TransferProgress(long Bytes, long Total, long ResumedFrom, string ConnectionId)
+{
+    public int Percent => (int)(Bytes * 100 / Math.Max(1, Total));
+}
 public record FileList(FileMeta[] Files);
 public sealed class ProtocolException(string message, uint? requestId = null) : IOException(message)
 {
@@ -22,6 +33,7 @@ public sealed class ProtocolException(string message, uint? requestId = null) : 
 public sealed class RemoteException(Result result) : Exception($"{result.Code}: {result.Message}")
 {
     public string Code { get; } = result.Code;
+    public bool Fatal { get; } = result.Fatal;
 }
 public record Frame(MessageType Type, uint RequestId, byte[] Payload)
 {
